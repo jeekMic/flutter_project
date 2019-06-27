@@ -159,7 +159,7 @@ class LeaderPhone extends StatelessWidget {
   }
 
   void _lanucher() async{
-    String url = "tel"+leaderPhone;
+    String url = "tel:"+leaderPhone;
     if(await canLaunch(url)){
         await launch(url);
     }else{
@@ -217,4 +217,4 @@ class LeaderPhone extends StatelessWidget {
 //       return print(e);
 //     }
 //   }
-// }
+}
