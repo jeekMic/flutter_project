@@ -152,7 +152,9 @@ class LeaderPhone extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       child: InkWell(
-      onTap: (){},
+      onTap: (){
+        _lanucher();
+      },
       child: Image.network(leaderImage),
       ),
     );
@@ -160,6 +162,7 @@ class LeaderPhone extends StatelessWidget {
 
   void _lanucher() async{
     String url = "tel:"+leaderPhone;
+    String url2 = "http://www.baidu.com";
     if(await canLaunch(url)){
         await launch(url);
     }else{
