@@ -9,12 +9,12 @@ class CategoryPage extends StatefulWidget {
 
 class _CategoryPageState extends State<CategoryPage> {
   TextEditingController textEditingController = new TextEditingController();
-  String showText = "收到数据信息";
+  String showText = "正在获取数据";
   @override
   void initState() {
-    getHomePageContent().then((val){
-          showText = val;
-    });
+    // getHomePageContent().then((val){
+    //       showText = val;
+    // });
     super.initState();
   }
   @override
@@ -24,7 +24,7 @@ class _CategoryPageState extends State<CategoryPage> {
         
         children: <Widget>[
           RaisedButton(
-            child: Text("点击查询数据"),
+            child: Text("鐐瑰嚮鏌ヨ�㈡暟鎹�"),
             padding: EdgeInsets.only(top: 100),
             onPressed: (){
               //  _require();
@@ -35,7 +35,7 @@ class _CategoryPageState extends State<CategoryPage> {
         maxLines: 15,
         controller: textEditingController,
         decoration: InputDecoration(
-            hintText: "请输入信息"
+            hintText: "璇疯緭鍏ヤ俊鎭�"
             
         ),
       ),

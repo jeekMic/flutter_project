@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_shop/config/httpHeader.dart';
@@ -13,43 +14,68 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin{
+  int page = 1;
+  List<Map> hotGoodsList = [];
+@override
+bool get wantKeepAlive => true;
+
   String homePageContent = "正在读取数据";
   List<Map> swiper;
   List<Map> bavigatorList;
   @override
   void initState() {
-    getHomePageContent().then((val){
-      setState(() {
-       homePageContent = val.toString(); 
-      });
-    });
     super.initState();
+    print("======初始化");
+    _getHotGoods();
+    print("======初始化");
   }
 
   @override
   Widget build(BuildContext context) {
+    var formData = {'lon':'115.12932', 'lat':'35.541'};
     return Container(
        child: Scaffold(
          appBar: AppBar(title: Text("百姓生活家"),),
          body: FutureBuilder(
-            future: getHomePageContent(),
+            future: request("homePageContent",formData:formData),
             builder: (context,snapshot){
               if(snapshot.hasData){
                 var data = json.decode(snapshot.data.toString());
+                print("is null=========");
+                print(data);
                 swiper = (data['data']['slides'] as List).cast();
                 bavigatorList = (data['data']['category'] as List).cast();
                 String adPicture = (data["data"]["advertesPicture"]["PICTURE_ADDRESS"]);
                 String leaderImage = data['data']['shopInfo']['leaderImage'];
                 String leaderPhone = data['data']['shopInfo']['leaderPhone'];
+                List<Map> recommendList = (data['data']['recommend'] as List).cast();
+                String floortitle = data['data']['floor1Pic']['PICTURE_ADDRESS'];
+                String floortitle2 = data['data']['floor2Pic']['PICTURE_ADDRESS'];
+                String floortitle3 = data['data']['floor3Pic']['PICTURE_ADDRESS'];
+                List<Map> floor1 = (data['data']['floor1'] as List).cast();
+                List<Map> floor3 = (data['data']['floor3'] as List).cast();
+                List<Map> floor2 = (data['data']['floor2'] as List).cast();
                 // List<Map> swiper = swiperimage;
-                return Column(
+                //use SingleChildScrollView() can avoid the content overflow screen
+                return SingleChildScrollView(
+                  child: Column(
                   children: <Widget>[
                     SwiperDiy(swiperDataList: swiper),
                     TopNavigator(bavigatorList:bavigatorList),
                     AdBanner(adPicture: adPicture,),
-                    LeaderPhone(leaderImage: leaderImage,leaderPhone: leaderPhone,)
+                    LeaderPhone(leaderImage: leaderImage,leaderPhone: leaderPhone,),
+                    Recommend(recommendList: recommendList,),
+                    FloorTitle(path:floortitle),
+                    FloorContent(floorGoodslist: floor1,),
+                    FloorTitle(path:floortitle2),
+                    FloorContent(floorGoodslist: floor2,),
+                    FloorTitle(path:floortitle3),
+                    FloorContent(floorGoodslist: floor3,),      
+                    _hotGoods(),
+                    // HotGoods(),
                   ],
+                ),
                 );
               }else{
                 return Center(
@@ -61,6 +87,89 @@ class _HomePageState extends State<HomePage> {
        ),
     );
   }
+  void _getHotGoods(){
+    var formData = {"page":page};
+    // request("homePaeBelowContent",formData:formData).then((val){
+    //   print("------------------------");
+    //   print(val);
+    // });
+
+
+    request("homePaeBelowContent",formData:formData).then((val){
+      print("_getHotGoods======${val}");
+      var data = json.decode(val.toString());
+      print("_getHotGoods======${data}");
+      List<Map> newGoodsList = (data['data'] as List).cast();
+      setState(() {
+       hotGoodsList.addAll(newGoodsList);
+       print(newGoodsList);
+       print("----------------${hotGoodsList.length}");
+       page++;
+      });
+    });
+  }
+  Widget hotTitle = Container(
+    margin: EdgeInsets.only(top: 10.0),
+    alignment: Alignment.center,
+    color: Colors.transparent,
+    child: Text("火爆专区"),
+  );
+
+  Widget _wrapList(){
+    print("========> ${hotGoodsList.length}");
+    if(hotGoodsList.length!=0){
+      List<Widget> list = hotGoodsList.map((val){
+          return InkWell(
+            onTap: (){},
+            child: Container(
+              width: ScreenUtil().setWidth(372),
+              color: Colors.white,
+              padding: EdgeInsets.all(5.0),
+              margin: EdgeInsets.only(bottom: 3.0),
+              child: Column(
+                children: <Widget>[
+                  Image.network(val['image'],width:ScreenUtil().setWidth(370),),
+                  Text(
+                    val['name'],
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style:TextStyle(color: Colors.pink, fontSize: ScreenUtil().setSp(26)),
+                  ),
+                  Column(
+                    children: <Widget>[
+                      Text('￥${val['mallPrice']}'),
+                      Text('￥${val['price']}',style: TextStyle(color: Colors.black26,decoration: TextDecoration.lineThrough),)
+                    ],
+                  ),
+                ],
+              ),
+
+            ),
+          );
+      }).toList();
+      return Wrap(
+        spacing: 2,
+        children: list,
+      );
+    }else{
+      print("数据为空");
+      return Text("");
+    }
+  }
+
+  Widget _hotGoods(){
+
+    return Container(
+      child: Column(
+        children: <Widget>[
+          hotTitle,
+          _wrapList(),
+        ],
+      ),
+    );
+  }
+
+
 }
 
 //轮播图组件
@@ -81,6 +190,7 @@ Widget build(BuildContext context) {
         itemBuilder: (BuildContext context, int index){
           return new Image.network("${swiperDataList[index]['image']}",fit: BoxFit.fill);
         },
+        
         itemCount: 3,
         pagination: new SwiperPagination(),
         controller: new SwiperController(),
@@ -170,54 +280,177 @@ class LeaderPhone extends StatelessWidget {
     }
 }
 
-// class HomePage extends StatefulWidget {
-//   HomePage({Key key}) : super(key: key);
 
-//   _HomePageState createState() => _HomePageState();
-// }
+}
+// commodity recommendation page
+class Recommend extends StatelessWidget {
+  //the data list from json
+  final List recommendList;
+  Recommend({Key key,this.recommendList}) : super(key: key);
+  //title
+  Widget _titleWidget(){
+    return Container(
+      alignment: Alignment.centerLeft,
+      padding: EdgeInsets.fromLTRB(10.0, 2.0, 0, 5.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(
+            bottom: BorderSide(width:0.5,color: Colors.black12)
+        ),
+      ),
+      child: Text("商品推荐",style: TextStyle(color: Colors.pink),),
+    );
+  }
+  //recommodity single item
+  Widget _item(index){
+    return InkWell(
+      onTap: (){
+        print("点击了${index}");
+      },
+      child: Container(
+        height: ScreenUtil().setHeight(330),
+        width: ScreenUtil().setWidth(250),
+        padding:EdgeInsets.all(8.0),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border(
+            left: BorderSide(width: 0.5,color: Colors.black12),
+          ),
+  
+            ),
+        child: SingleChildScrollView(
+          child: Column(
+          children: <Widget>[
+            Image.network(recommendList[index]["image"]),
+            Text('￥${recommendList[index]['mallPrice']}'),
+            Text('￥${recommendList[index]['price']}',
+                style: TextStyle(
+                  //删除线
+                  decoration: TextDecoration.lineThrough,
+                  color: Colors.grey
+                ),
+              ),
+          ],
+        ),
+        )
+      
+      ),
+    );
+  }
+ // row list
+ Widget _recommendList(){
+   return Container(
+     height: ScreenUtil().setHeight(330),
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: recommendList.length,
+        itemBuilder: (context, index){
+            return _item(index);
+        },
+      ),
+   );
+ }
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: ScreenUtil().setHeight(380),
+      margin: EdgeInsets.only(top:10),
+      child: Column(
+        children: <Widget>[
+          _titleWidget(),
+          _recommendList()
+        ],
+      ),
+      
+    );
+  }
+}
 
-// class _HomePageState extends State<HomePage> {
-//   String showText = "还没有内容";
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//        child: Scaffold(
-//          appBar: AppBar(title: Text("请求远程数据"),),
-//          body: SingleChildScrollView(
-//            child: Column(
-//              children: <Widget>[
-//                RaisedButton(
-//                  child: Text("请求数据"),
-//                  onPressed: (){
-//                    _jike();
-//                  },
-//                ),
-//                Text(showText),
-//              ],
-//            ),
-//          ),
-//        ),
-//     );
-//   }
-//   void _jike(){
-//     print("开始请求数据");
-//     getHttp().then((val){
-//         setState(() {
-//           // showText = val["data"]["name"];
-//           showText = val.toString();
-//         });
-//     });
-//   }
-//   Future getHttp() async{
-//     try{
-//         Response response;
-//         Dio dio = new Dio();
-//         dio.options.headers = httpHeader;
-//         response = await dio.get("https://time.geekbang.org/serv/v1/column/newAll");
-//         print(response);
-//         return response.data;
-//     }catch(e){
-//       return print(e);
-//     }
-//   }
+class FloorTitle extends StatelessWidget {
+  final String path;
+  FloorTitle({Key key,this.path}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(8.0),
+      child: Image.network(path),
+    );
+  }
+}
+class FloorContent extends StatelessWidget {
+  final List floorGoodslist;
+  FloorContent({Key key,this.floorGoodslist}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Column(
+        children: <Widget>[
+          _firstRow(),
+          _otherGoods(),
+        ],
+      ),
+    );
+  }
+  Widget _firstRow(){
+    return Row(
+      children: <Widget>[
+              _goodsItem(floorGoodslist[0]),
+            Column(
+            children: <Widget>[
+              _goodsItem(floorGoodslist[1]),
+              _goodsItem(floorGoodslist[2]),
+                              ],
+            )
+      ],
+    );
+  }
+
+  Widget _otherGoods(){
+    return Row(
+      children: <Widget>[
+        _goodsItem(floorGoodslist[3]),
+        _goodsItem(floorGoodslist[4]),
+      ],
+    );
+  }
+  Widget _goodsItem(Map goods){
+    return Container(
+      width: ScreenUtil().setWidth(375),
+      child: InkWell(
+        onTap: (){
+          print("点击了楼层商品");
+        },
+        child:Image.network(goods['image']),
+      ),
+    );
+  }
+}
+
+
+class HotGoods extends StatefulWidget {
+  HotGoods({Key key}) : super(key: key);
+
+  _HotGoodsState createState() => _HotGoodsState();
+}
+
+class _HotGoodsState extends State<HotGoods> {
+@override
+  void initState() {
+    var formData = {'lon':'115.12932', 'lat':'35.541'};
+    // TODO: implement initState
+    super.initState();
+    request("homePaeBelowContent",formData:formData).then((val){
+      print("------------------------");
+      print(val);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+       child: Text("hb"),
+    );
+  }
 }
