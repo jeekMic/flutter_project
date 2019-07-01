@@ -9,6 +9,8 @@ import '../model/category.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provide/provide.dart';
 import '../provide/child_category.dart';
+import '../model/categoryGoodList.dart';
+
 class CategoryPage extends StatefulWidget {
   CategoryPage({Key key}) : super(key: key);
 
@@ -33,7 +35,8 @@ class _CategoryPageState extends State<CategoryPage> {
             LeftCategory(),
             Column(
               children: <Widget>[
-                 RightCategoryNav()
+                 RightCategoryNav(),
+                 CategoryGoodsList(),
               ],
             ),
 
@@ -157,11 +160,8 @@ class _RightCategoryNavState extends State<RightCategoryNav> {
       },
     ); 
     
-    
-    
 
   }
-
   Widget _rightInkWell(BxMallSubDto item){
       return InkWell(
         onTap: (){},
@@ -174,4 +174,74 @@ class _RightCategoryNavState extends State<RightCategoryNav> {
         ),
       );
   }
+}
+//商品列表，上拉加载
+class CategoryGoodsList extends StatefulWidget {
+  CategoryGoodsList({Key key}) : super(key: key);
+
+  _CategoryGoodsListState createState() => _CategoryGoodsListState();
+}
+
+class _CategoryGoodsListState extends State<CategoryGoodsList> {
+  List list = [];
+  @override
+  void initState() {
+    _getGoodsList();
+    super.initState();
+  }
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+       child: Text("商品列表页面"),
+    );
+  }
+
+  void _getGoodsList() async{
+    var data = {
+      'categoryId':'4',
+      'CategorySubId':'',
+      'page':1,
+    };
+    await request('getMallGoods', formData:data).then((val){
+      var data = json.decode(val.toString());
+      CategoryGoodsListModel goodsList = CategoryGoodsListModel.fromJson(data);
+      setState(() {
+       list = goodsList.data; 
+      });
+    });
+
+  }
+
+
+  Widget _goodsImage(index){
+    return Container(
+      width: ScreenUtil().setWidth(200),
+      child: Image.network(list[index].image),
+    );
+  }
+  Widget _goodsName(index){
+    return  Container(
+      padding:EdgeInsets.all(5.0),
+      width:ScreenUtil().setWidth(370),
+      child:Text(
+      list[index].goodsName,
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+      style: TextStyle(fontSize: ScreenUtil().setSp(28)),
+    ),
+    );
+  }
+  Widget _goodsprice(index){
+    return Container(
+      child: Row(
+          children: <Widget>[
+            Text("价格￥${list[index].presentPrice}",style: TextStyle(color: Colors.pink,fontSize: ScreenUtil().setSp(30)),),
+
+            Text("${list[index].presentPrice}",style:TextStyle(color: Colors.black26,decoration: TextDecoration.lineThrough)),
+          ],
+          
+      ),
+    );
+  }
+
 }
