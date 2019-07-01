@@ -8,6 +8,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
 import 'dart:convert';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_easyrefresh/easy_refresh.dart';
 class HomePage extends StatefulWidget {
   HomePage({Key key}) : super(key: key);
 
@@ -17,6 +18,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> with AutomaticKeepAliveClientMixin{
   int page = 1;
   List<Map> hotGoodsList = [];
+  GlobalKey<RefreshFooterState> _footerkey = new GlobalKey<RefreshFooterState>();
 @override
 bool get wantKeepAlive => true;
 
@@ -58,9 +60,22 @@ bool get wantKeepAlive => true;
                 List<Map> floor2 = (data['data']['floor2'] as List).cast();
                 // List<Map> swiper = swiperimage;
                 //use SingleChildScrollView() can avoid the content overflow screen
-                return SingleChildScrollView(
-                  child: Column(
-                  children: <Widget>[
+                return EasyRefresh(
+                  // refreshHeader: ClassicsFooter(
+
+                  // ),
+                  refreshFooter: ClassicsFooter(
+                    key: _footerkey,
+                      bgColor: Colors.white,
+                      textColor: Colors.pink,
+                      moreInfoColor: Colors.pink,
+                      showMore: true,
+                      noMoreText: '',
+                      moreInfo: "加载中...",
+                      loadReadyText: "上拉加载",
+                  ),
+                  child: ListView(
+                    children: <Widget>[
                     SwiperDiy(swiperDataList: swiper),
                     TopNavigator(bavigatorList:bavigatorList),
                     AdBanner(adPicture: adPicture,),
@@ -75,7 +90,22 @@ bool get wantKeepAlive => true;
                     _hotGoods(),
                     // HotGoods(),
                   ],
-                ),
+                  ),
+                  loadMore: () async{
+                    print("加载更多");
+                    var formData = {"page":page};
+                    await request("homePaeBelowContent",formData:formData).then((val){
+                      var data = json.decode(val.toString());
+                      List<Map> newGoodsList = (data['data'] as List).cast();
+                      setState(() {
+                       hotGoodsList.addAll(newGoodsList);
+                       page++; 
+                      });
+                    });
+                  },
+                  onRefresh:()async{
+
+                  },
                 );
               }else{
                 return Center(
@@ -229,6 +259,7 @@ class TopNavigator extends StatelessWidget {
       height: ScreenUtil().setHeight(320),
       padding: EdgeInsets.all(3.0),
       child: GridView.count(
+        physics: NeverScrollableScrollPhysics(),
         crossAxisCount: 5,
         padding: EdgeInsets.all(5.0),
         children: bavigatorList.map((item){

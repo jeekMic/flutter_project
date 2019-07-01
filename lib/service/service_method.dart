@@ -17,10 +17,8 @@ import 'package:path_provider/path_provider.dart';
       }
   
       if(response.statusCode==200){
-          print("数据获取成功==");
         return response.data;
       }else{
-          print("数据获取失败===========");
         return "moni";
       }
   }catch(e){

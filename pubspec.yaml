@@ -28,6 +28,8 @@ dependencies:
   path_provider:
   url_launcher:
   flutter_swiper:
+  flutter_easyrefresh:
+  provide: ^1.0.2
 dev_dependencies:
   flutter_test:
     sdk: flutter
