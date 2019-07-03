@@ -12,7 +12,7 @@ class ChildCategory with ChangeNotifier{
     noMoreText="";
     childIndex = 0;//点击大类切换时候更改为0
     BxMallSubDto all = BxMallSubDto();
-    all.mallCategoryId="00";
+    all.mallCategoryId="";
     all.comments = "null";
     all.mallCategoryId="00";
     all.mallSubName="全部";

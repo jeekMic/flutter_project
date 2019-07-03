@@ -30,6 +30,9 @@ dependencies:
   flutter_swiper:
   flutter_easyrefresh:
   provide: ^1.0.2
+  fluttertoast:
+  fluro:
+    
 dev_dependencies:
   flutter_test:
     sdk: flutter

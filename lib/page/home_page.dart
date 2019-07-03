@@ -9,6 +9,7 @@ import 'package:flutter_swiper/flutter_swiper.dart';
 import 'dart:convert';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_easyrefresh/easy_refresh.dart';
+import '../routers/application.dart';
 class HomePage extends StatefulWidget {
   HomePage({Key key}) : super(key: key);
 
@@ -117,7 +118,7 @@ bool get wantKeepAlive => true;
        ),
     );
   }
-  void _getHotGoods(){
+  void _getHotGoods() async{
     var formData = {"page":page};
     // request("homePaeBelowContent",formData:formData).then((val){
     //   print("------------------------");
@@ -125,7 +126,7 @@ bool get wantKeepAlive => true;
     // });
 
 
-    request("homePaeBelowContent",formData:formData).then((val){
+    await request("homePaeBelowContent",formData:formData).then((val){
       print("_getHotGoods======${val}");
       var data = json.decode(val.toString());
       print("_getHotGoods======${data}");
@@ -150,7 +151,9 @@ bool get wantKeepAlive => true;
     if(hotGoodsList.length!=0){
       List<Widget> list = hotGoodsList.map((val){
           return InkWell(
-            onTap: (){},
+            onTap: (){
+              Application.router.navigateTo(context, "/detail?id=${val['goodsId']}");
+            },
             child: Container(
               width: ScreenUtil().setWidth(372),
               color: Colors.white,
@@ -218,7 +221,14 @@ Widget build(BuildContext context) {
       width:ScreenUtil().setWidth(750),
       child: Swiper(
         itemBuilder: (BuildContext context, int index){
-          return new Image.network("${swiperDataList[index]['image']}",fit: BoxFit.fill);
+          return InkWell(
+            onTap: (){
+              Application.router.navigateTo(context, "/detail?id=${swiperDataList[index]['goodsId']}");
+            },
+            child: new Image.network("${swiperDataList[index]['image']}",fit: BoxFit.fill),
+          ); 
+          
+          
         },
         
         itemCount: 3,
@@ -333,10 +343,10 @@ class Recommend extends StatelessWidget {
     );
   }
   //recommodity single item
-  Widget _item(index){
+  Widget _item(context,index){
     return InkWell(
       onTap: (){
-        print("点击了${index}");
+        Application.router.navigateTo(context, '/detail?id=${recommendList[index]['goodsId']}');
       },
       child: Container(
         height: ScreenUtil().setHeight(330),
@@ -376,7 +386,7 @@ class Recommend extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         itemCount: recommendList.length,
         itemBuilder: (context, index){
-            return _item(index);
+            return _item(context,index);
         },
       ),
    );
@@ -418,40 +428,40 @@ class FloorContent extends StatelessWidget {
     return Container(
       child: Column(
         children: <Widget>[
-          _firstRow(),
-          _otherGoods(),
+          _firstRow(context),
+          _otherGoods(context),
         ],
       ),
     );
   }
-  Widget _firstRow(){
+  Widget _firstRow(context){
     return Row(
       children: <Widget>[
-              _goodsItem(floorGoodslist[0]),
+              _goodsItem(context,floorGoodslist[0]),
             Column(
             children: <Widget>[
-              _goodsItem(floorGoodslist[1]),
-              _goodsItem(floorGoodslist[2]),
+              _goodsItem(context,floorGoodslist[1]),
+              _goodsItem(context,floorGoodslist[2]),
                               ],
             )
       ],
     );
   }
 
-  Widget _otherGoods(){
+  Widget _otherGoods(context){
     return Row(
       children: <Widget>[
-        _goodsItem(floorGoodslist[3]),
-        _goodsItem(floorGoodslist[4]),
+        _goodsItem(context,floorGoodslist[3]),
+        _goodsItem(context,floorGoodslist[4]),
       ],
     );
   }
-  Widget _goodsItem(Map goods){
+  Widget _goodsItem(context,Map goods){
     return Container(
       width: ScreenUtil().setWidth(375),
       child: InkWell(
         onTap: (){
-          print("点击了楼层商品");
+          Application.router.navigateTo(context, "/detail?id=${goods['goodsId']}");
         },
         child:Image.network(goods['image']),
       ),
