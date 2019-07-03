@@ -53,6 +53,7 @@ class DetailsTabbar extends StatelessWidget {
   }
 }
 
+
   Widget _myTabbarRight(BuildContext context, bool isleft){
     return InkWell(
       onTap: (){
