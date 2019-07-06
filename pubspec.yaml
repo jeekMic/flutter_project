@@ -31,7 +31,9 @@ dependencies:
   flutter_easyrefresh:
   provide: ^1.0.2
   fluttertoast:
+  flutter_html:
   fluro:
+  shared_preferences:
     
 dev_dependencies:
   flutter_test:

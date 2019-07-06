@@ -1,6 +1,7 @@
 import 'package:fluro/fluro.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_shop/page/index_page.dart';
+import 'package:flutter_shop/provide/cart.dart';
 import 'package:flutter_shop/provide/detal_info.dart';
 import 'package:provide/provide.dart';
 import './provide/counter.dart';
@@ -13,12 +14,14 @@ void main(){
   var childCategory = ChildCategory();
   var detailsInfoProvider = DetailsInfoProvider();
   var categoryGoodsListProvide = CategoryGoodsListProvide();
+  var cartProvide = CartProvide();
   var providers = Providers();
 
   providers..provide(Provider<Counter>.value(counter))
            ..provide(Provider<ChildCategory>.value(childCategory))
            ..provide(Provider<DetailsInfoProvider>.value(detailsInfoProvider))
-           ..provide(Provider<CategoryGoodsListProvide>.value(categoryGoodsListProvide));
+           ..provide(Provider<DetailsInfoProvider>.value(detailsInfoProvider))
+           ..provide(Provider<CartProvide>.value(cartProvide));
   runApp(ProviderNode(child: MyApp(),providers: providers,));
   }
 

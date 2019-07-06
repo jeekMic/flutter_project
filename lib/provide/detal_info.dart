@@ -14,10 +14,11 @@ class DetailsInfoProvider with ChangeNotifier{
         isLeft = false;
         isRight  =true; 
       }
+      notifyListeners();
     }
     DeatilModel goods_info = null;
     //从后台设置数据
-    setGoodInfo(String id){
+    setGoodInfo(String id) async{
       var formData = {"goodId":id};
       request("getGoodDetailById",formData: formData).then((val){
         var responseData = json.decode(val.toString());
